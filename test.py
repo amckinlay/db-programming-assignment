@@ -211,6 +211,6 @@ if __name__ == "__main__":
 	# 	pass
 	# init_db()
 	# # Load sample data
-	load_sample()
+	# load_sample()
 	app.run(host="0.0.0.0", port=8080, debug=True)
 	
