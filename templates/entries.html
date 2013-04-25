@@ -1,0 +1,42 @@
+{% extends "layout.html" %}
+{% block container %}
+{% if entries|length == 0 %}
+<p>Sorry, this table is empty</p>
+{% endif %}
+<table class="table table-striped">
+	<thead>
+		<tr>
+		{% for key in entries[0] %}
+			<th>{{ key }}</th>
+		{% endfor %}
+		</tr>
+	</thead>
+	<tbody>
+		{% for entry in entries %}
+			<tr>
+				{% for key in entry %}
+					<td>{{ entry[key] }}</td>
+				{% endfor %}
+			</tr>
+		{% endfor %}
+	</tbody>
+</table>
+<form action="{{ url_for('add_' + active_page) }}" method="post" class="form-inline">
+	<fieldset>
+		<legend>{{"Add " + active_page}}</legend>
+		{% for key in entries[0] %}
+			<input type="text" class="input-small" placeholder={{ key }} name={{ key }}>
+		{% endfor %}
+		<button type="submit" class="btn">Add</button>
+	</fieldset>
+</form>
+<form action="{{ url_for('qdb') }}" method="post">
+	<fieldset>
+		<legend>Query db</legend>
+		<textarea type="text" rows="3" placeholder="Type query..." name="sql"></textarea>
+		<span class="help-block">This is a very dangerous security hole ;)</span>
+		<input type="hidden" name="redirect" value={{ active_page }}>
+		<button type="submit" class=" btn">Evaluate SQL</button>
+	</fieldset>
+</form>
+{% endblock %}

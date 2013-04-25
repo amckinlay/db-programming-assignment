@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>Elementary school management system</title>
+		<!-- Le styles -->
+		<link rel=stylesheet href="{{ url_for('static', filename='bootstrap/css/bootstrap.css') }}">
+		<link rel=stylesheet href="{{ url_for('static', filename='bootstrap/css/bootstrap-responsive.css') }}">
+			<style>
+				body {
+					padding-top: 60px;
+				}
+				@media (max-width: 980px) {
+					body {
+						padding-top: 0px;
+					}
+				}
+			</style>
+		<!-- Le scripts -->
+		<script href="{{ url_for('static', filename='jquery-2.0.0.js') }}"></script>
+		<script href="{{ url_for('static', filename='bootstrap/js/bootstrap.js') }}"></script>
+	</head>
+	<body>
+		<div class="navbar navbar-inverse navbar-fixed-top">
+			<div class="navbar-inner">
+				<div class="container">
+					<button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+						<span class="icon-bar"></span>
+						<span class="icon-bar"></span>
+						<span class="icon-bar"></span>
+					</button>
+					<a class="brand" href="#">Elementary school management system</a>
+					<div class="nav-collapse collapse">
+						<ul class="nav">
+							{% set navigation_bar = [
+							    (url_for('home'), 'Home'),
+							    (url_for('teachers'), 'Teachers'),
+							    (url_for('students'), 'Students'),
+							    (url_for('administrators'), 'Administrators'),
+							    (url_for('staff'), 'Staff'),
+							    (url_for('courses'), 'Courses'),
+							    (url_for('teaches'), 'Teaches'),
+							    (url_for('enrollments'), 'Enrollments')
+							] %}
+							{% set active_page = active_page|default('home') %}
+							{% for href, caption in navigation_bar %}
+								<li{% if caption.lower() == active_page.lower() %} class="active"{% endif %}><a href="{{ href|e }}">{{ caption|e }}</a></li>
+							{% endfor %}
+						</ul>
+					</div><!--/.nav-collapse -->
+				</div>
+			</div>
+		</div>
+		<div class="container">
+			{% block container %}{% endblock %}
+		</div> <!-- /container -->
+	</body>
+</html>
