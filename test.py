@@ -1,4 +1,3 @@
-# import os
 import sqlite3
 
 from flask import Flask, g, render_template, request, redirect, url_for
@@ -13,11 +12,18 @@ def connect_db():
     return conn
 
 
-def init_db():
-    with connect_db() as db:
-        with app.open_resource("schema.sql") as f:
-            db.executescript(f.read())
-        db.commit()
+def load_schema():
+    with app.open_resource("schema.sql") as schema:
+        with connect_db() as db:
+            db.executescript(schema.read())
+            db.commit()
+
+
+def load_sample():
+    with app.open_resource("sample_data.sql") as data:
+        with connect_db() as db:
+            db.executescript(data.read())
+            db.commit()
 
 
 def query_db(query, args=(), one=False):
@@ -28,11 +34,14 @@ def query_db(query, args=(), one=False):
     return (rv[0] if rv else None) if one else rv
 
 
-def load_sample():
-    with open("sample_data.sql") as data:
-        with connect_db() as db:
-            db.executescript(data.read())
-            db.commit()
+@app.before_first_request
+def before_first_request():
+    try:
+        with app.open_resource("database.db"):
+            pass
+    except IOError:
+        load_schema()
+        load_sample()
 
 
 @app.before_request
@@ -256,11 +265,4 @@ def add_enrollments():
 
 
 if __name__ == "__main__":
-    # try: # Not a good solution and db name should be in config
-    #   os.remove("database.db")
-    # except OSError:
-    #   pass
-    # init_db()
-    # # Load sample data
-    # load_sample()
     app.run(host="0.0.0.0", port=8080, debug=True)
