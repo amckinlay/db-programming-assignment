@@ -92,7 +92,6 @@ def add_teachers():
         g.db.commit()
     except sqlite3.IntegrityError as e:
         print e
-    g.db.commit()
     return redirect(url_for('teachers'))
 
 
@@ -122,7 +121,6 @@ def add_students():
         g.db.commit()
     except sqlite3.IntegrityError as e:
         print e
-    g.db.commit()
     return redirect(url_for('teachers'))
 
 
@@ -156,7 +154,6 @@ def add_administrators():
         g.db.commit()
     except sqlite3.IntegrityError as e:
         print e
-    g.db.commit()
     return redirect(url_for('administrators'))
 
 
@@ -183,7 +180,6 @@ def add_staff():
         g.db.commit()
     except sqlite3.IntegrityError as e:
         print e
-    g.db.commit()
     return redirect(url_for('staff'))
 
 
@@ -208,7 +204,6 @@ def add_courses():
         g.db.commit()
     except sqlite3.IntegrityError as e:
         print e
-    g.db.commit()
     return redirect(url_for('courses'))
 
 
@@ -235,7 +230,6 @@ def add_teaches():
         g.db.commit()
     except sqlite3.IntegrityError as e:
         print e
-    g.db.commit()
     return redirect(url_for('teaches'))
 
 
@@ -260,7 +254,6 @@ def add_enrollments():
         g.db.commit()
     except sqlite3.IntegrityError as e:
         print e
-    g.db.commit()
     return redirect(url_for('enrollments'))
 
 
