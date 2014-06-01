@@ -69,7 +69,6 @@ def teachers():
 
 @app.route('/teachers', methods=['POST'])
 def add_teachers():
-    request.form['ssn']
     try:
         g.db.execute('insert into Teachers values (?, ?, ?, ?, ?, ?, ?, ?)', [
             request.form['ssn'],
@@ -82,8 +81,8 @@ def add_teachers():
             request.form['salary']
         ])
         g.db.commit()
-    except sqlite3.IntegrityError:
-        pass
+    except sqlite3.IntegrityError as e:
+        print e
     g.db.commit()
     return redirect(url_for('teachers'))
 
