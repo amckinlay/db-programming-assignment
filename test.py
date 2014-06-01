@@ -5,212 +5,262 @@ import os
 
 app = Flask(__name__)
 
+
 def connect_db():
-	conn = sqlite3.connect("database.db")
-	conn.execute("PRAGMA foreign_keys = ON;")
-	return conn
+    conn = sqlite3.connect("database.db")
+    conn.execute("PRAGMA foreign_keys = ON;")
+    return conn
+
 
 def init_db():
-	with closing(connect_db()) as db: # Why is closing necessary?
-		with app.open_resource("schema.sql") as f:
-			db.executescript(f.read())
-		db.commit()
+    with closing(connect_db()) as db:  # Why is closing necessary?
+        with app.open_resource("schema.sql") as f:
+            db.executescript(f.read())
+        db.commit()
+
 
 def query_db(query, args=(), one=False):
-	cur = g.db.execute(query, args)
-	rv = [dict((cur.description[idx][0], value)
-			   for idx, value in enumerate(row)) for row in cur.fetchall()]
-	return (rv[0] if rv else None) if one else rv
+    cur = g.db.execute(query, args)
+    rv = [dict((cur.description[idx][0], value)
+               for idx, value in enumerate(row))
+          for row in cur.fetchall()]
+    return (rv[0] if rv else None) if one else rv
+
 
 def load_sample():
-	with open("sample_data.sql") as data:
-		with connect_db() as db:
-			db.executescript(data.read())
-			db.commit()
+    with open("sample_data.sql") as data:
+        with connect_db() as db:
+            db.executescript(data.read())
+            db.commit()
+
 
 @app.before_request
 def before_request():
-	g.db = connect_db()
+    g.db = connect_db()
+
 
 @app.teardown_request
 def teardown_request(e):
-	g.db.close()
+    g.db.close()
+
 
 @app.route("/qdb", methods=['POST'])
 def qdb():
-	g.db.execute(request.form['sql'])
-	g.db.commit()
-	return redirect(url_for(request.form['redirect']))
+    g.db.execute(request.form['sql'])
+    g.db.commit()
+    return redirect(url_for(request.form['redirect']))
+
 
 @app.route("/")
 def home():
-	return render_template("home.html")
+    return render_template("home.html")
+
 
 @app.route("/teachers")
 def teachers():
-	result = query_db("select * from Teachers")
-	return render_template("entries.html", entries=result, active_page="teachers")
+    result = query_db("select * from Teachers")
+    return render_template(
+        "entries.html",
+        entries=result,
+        active_page="teachers"
+    )
+
 
 @app.route('/teachers', methods=['POST'])
 def add_teachers():
-	request.form['ssn']
-	try:
-		g.db.execute('insert into Teachers values (?, ?, ?, ?, ?, ?, ?, ?)', [
-			request.form['ssn'], 
-			request.form['firstName'],
-			request.form['lastName'],
-			request.form['phone'],
-			request.form['gender'],
-			request.form['dob'],
-			request.form['address'],
-			request.form['salary']
-		])
-		g.db.commit()
-	except sqlite3.IntegrityError:
-		pass
-	g.db.commit()
-	return redirect(url_for('teachers'))
+    request.form['ssn']
+    try:
+        g.db.execute('insert into Teachers values (?, ?, ?, ?, ?, ?, ?, ?)', [
+            request.form['ssn'],
+            request.form['firstName'],
+            request.form['lastName'],
+            request.form['phone'],
+            request.form['gender'],
+            request.form['dob'],
+            request.form['address'],
+            request.form['salary']
+        ])
+        g.db.commit()
+    except sqlite3.IntegrityError:
+        pass
+    g.db.commit()
+    return redirect(url_for('teachers'))
+
 
 @app.route("/students")
 def students():
-	result = query_db("select * from Students")
-	return render_template("entries.html", entries=result, active_page="students")
+    result = query_db("select * from Students")
+    return render_template(
+        "entries.html",
+        entries=result,
+        active_page="students"
+    )
+
 
 @app.route('/students', methods=['POST'])
 def add_students():
-	try:
-		g.db.execute('insert into Students values (?, ?, ?, ?, ?, ?, ?, ?)', [
-			request.form['ssn'], 
-			request.form['firstName'],
-			request.form['lastName'],
-			request.form['gender'],
-			request.form['dob'],
-			request.form['address'],
-			request.form['level'],
-			request.form['gpa']
-		])
-		g.db.commit()
-	except sqlite3.IntegrityError as e:
-		print e
-	g.db.commit()
-	return redirect(url_for('teachers'))
+    try:
+        g.db.execute('insert into Students values (?, ?, ?, ?, ?, ?, ?, ?)', [
+            request.form['ssn'],
+            request.form['firstName'],
+            request.form['lastName'],
+            request.form['gender'],
+            request.form['dob'],
+            request.form['address'],
+            request.form['level'],
+            request.form['gpa']
+        ])
+        g.db.commit()
+    except sqlite3.IntegrityError as e:
+        print e
+    g.db.commit()
+    return redirect(url_for('teachers'))
+
 
 @app.route("/administrators")
 def administrators():
-	result = query_db("select * from Administrators")
-	return render_template("entries.html", entries=result, active_page="administrators")
+    result = query_db("select * from Administrators")
+    return render_template(
+        "entries.html",
+        entries=result,
+        active_page="administrators"
+    )
+
 
 @app.route('/administrators', methods=['POST'])
 def add_administrators():
-	try:
-		g.db.execute('insert into Administrators values (?, ?, ?, ?, ?, ?, ?, ?, ?)', [
-			request.form['ssn'], 
-			request.form['firstName'],
-			request.form['lastName'],
-			request.form['phone'],
-			request.form['gender'],
-			request.form['dob'],
-			request.form['address'],
-			request.form['salary'],
-			request.form['role']
-		])
-		g.db.commit()
-	except sqlite3.IntegrityError as e:
-		print e
-	g.db.commit()
-	return redirect(url_for('administrators'))
+    try:
+        g.db.execute(
+            'insert into Administrators values (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            [
+                request.form['ssn'],
+                request.form['firstName'],
+                request.form['lastName'],
+                request.form['phone'],
+                request.form['gender'],
+                request.form['dob'],
+                request.form['address'],
+                request.form['salary'],
+                request.form['role']
+            ]
+        )
+        g.db.commit()
+    except sqlite3.IntegrityError as e:
+        print e
+    g.db.commit()
+    return redirect(url_for('administrators'))
+
 
 @app.route("/staff")
 def staff():
-	result = query_db("select * from Staff")
-	return render_template("entries.html", entries=result, active_page="staff")
+    result = query_db("select * from Staff")
+    return render_template("entries.html", entries=result, active_page="staff")
+
 
 @app.route('/staff', methods=['POST'])
 def add_staff():
-	try:
-		g.db.execute('insert into Staff values (?, ?, ?, ?, ?, ?, ?, ?, ?)', [
-			request.form['ssn'], 
-			request.form['firstName'],
-			request.form['lastName'],
-			request.form['phone'],
-			request.form['gender'],
-			request.form['dob'],
-			request.form['address'],
-			request.form['salary'],
-			request.form['role']
-		])
-		g.db.commit()
-	except sqlite3.IntegrityError as e:
-		print e
-	g.db.commit()
-	return redirect(url_for('staff'))
+    try:
+        g.db.execute('insert into Staff values (?, ?, ?, ?, ?, ?, ?, ?, ?)', [
+            request.form['ssn'],
+            request.form['firstName'],
+            request.form['lastName'],
+            request.form['phone'],
+            request.form['gender'],
+            request.form['dob'],
+            request.form['address'],
+            request.form['salary'],
+            request.form['role']
+        ])
+        g.db.commit()
+    except sqlite3.IntegrityError as e:
+        print e
+    g.db.commit()
+    return redirect(url_for('staff'))
+
 
 @app.route("/courses")
 def courses():
-	result = query_db("select * from Courses")
-	return render_template("entries.html", entries=result, active_page="courses")
+    result = query_db("select * from Courses")
+    return render_template(
+        "entries.html",
+        entries=result,
+        active_page="courses"
+    )
+
 
 @app.route('/courses', methods=['POST'])
 def add_courses():
-	try:
-		g.db.execute('insert into Courses values (?, ?, ?)', [
-			request.form['courseId'], 
-			request.form['name'],
-			request.form['level']
-		])
-		g.db.commit()
-	except sqlite3.IntegrityError as e:
-		print e
-	g.db.commit()
-	return redirect(url_for('courses'))
+    try:
+        g.db.execute('insert into Courses values (?, ?, ?)', [
+            request.form['courseId'],
+            request.form['name'],
+            request.form['level']
+        ])
+        g.db.commit()
+    except sqlite3.IntegrityError as e:
+        print e
+    g.db.commit()
+    return redirect(url_for('courses'))
+
 
 @app.route("/teaches")
 def teaches():
-	result = query_db("select * from Teaches")
-	return render_template("entries.html", entries=result, active_page="teaches")
+    result = query_db("select * from Teaches")
+    return render_template(
+        "entries.html",
+        entries=result,
+        active_page="teaches"
+    )
+
 
 @app.route('/teaches', methods=['POST'])
 def add_teaches():
-	try:
-		g.db.execute('insert into Teaches values (?, ?, ?, ?, ?)', [
-			request.form['teachesId'], 
-			request.form['ssn'],
-			request.form['courseId'],
-			request.form['semester'],
-			request.form['year']
-		])
-		g.db.commit()
-	except sqlite3.IntegrityError as e:
-		print e
-	g.db.commit()
-	return redirect(url_for('teaches'))
+    try:
+        g.db.execute('insert into Teaches values (?, ?, ?, ?, ?)', [
+            request.form['teachesId'],
+            request.form['ssn'],
+            request.form['courseId'],
+            request.form['semester'],
+            request.form['year']
+        ])
+        g.db.commit()
+    except sqlite3.IntegrityError as e:
+        print e
+    g.db.commit()
+    return redirect(url_for('teaches'))
+
 
 @app.route("/enrollments")
 def enrollments():
-	result = query_db("select * from Enrollments")
-	return render_template("entries.html", entries=result, active_page="enrollments")
+    result = query_db("select * from Enrollments")
+    return render_template(
+        "entries.html",
+        entries=result,
+        active_page="enrollments"
+    )
+
 
 @app.route('/enrollments', methods=['POST'])
 def add_enrollments():
-	try:
-		g.db.execute('insert into Enrollments values (?, ?, ?)', [
-			request.form['ssn'], 
-			request.form['teachesId'],
-			request.form['grade']
-		])
-		g.db.commit()
-	except sqlite3.IntegrityError as e:
-		print e
-	g.db.commit()
-	return redirect(url_for('enrollments'))
+    try:
+        g.db.execute('insert into Enrollments values (?, ?, ?)', [
+            request.form['ssn'],
+            request.form['teachesId'],
+            request.form['grade']
+        ])
+        g.db.commit()
+    except sqlite3.IntegrityError as e:
+        print e
+    g.db.commit()
+    return redirect(url_for('enrollments'))
+
 
 if __name__ == "__main__":
-	# try: # Not a good solution and db name should be in config
-	# 	os.remove("database.db")
-	# except OSError:
-	# 	pass
-	# init_db()
-	# # Load sample data
-	# load_sample()
-	app.run(host="0.0.0.0", port=8080, debug=True)
-	
+    # try: # Not a good solution and db name should be in config
+    #   os.remove("database.db")
+    # except OSError:
+    #   pass
+    # init_db()
+    # # Load sample data
+    # load_sample()
+    app.run(host="0.0.0.0", port=8080, debug=True)
