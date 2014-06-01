@@ -1,6 +1,5 @@
 import sqlite3
 from flask import Flask, g, render_template, request, redirect, url_for
-from contextlib import closing
 import os
 
 app = Flask(__name__)
@@ -13,7 +12,7 @@ def connect_db():
 
 
 def init_db():
-    with closing(connect_db()) as db:  # Why is closing necessary?
+    with connect_db() as db:
         with app.open_resource("schema.sql") as f:
             db.executescript(f.read())
         db.commit()
