@@ -9,6 +9,7 @@ app = Flask(__name__)
 def connect_db():
     conn = sqlite3.connect("database.db")
     conn.execute("PRAGMA foreign_keys = ON;")
+    conn.row_factory = sqlite3.Row
     return conn
 
 
@@ -28,9 +29,7 @@ def load_sample():
 
 def query_db(query, args=(), one=False):
     cur = g.db.execute(query, args)
-    rv = [dict((cur.description[idx][0], value)
-               for idx, value in enumerate(row))
-          for row in cur.fetchall()]
+    rv = cur.fetchall()
     cur.close()
     return (rv[0] if rv else None) if one else rv
 
