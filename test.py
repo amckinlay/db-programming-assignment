@@ -28,9 +28,8 @@ def load_sample():
 
 
 def query_db(query, args=(), one=False):
-    cur = g.db.execute(query, args)
-    rv = cur.fetchall()
-    cur.close()
+    with g.db.execute(query, args) as cur:
+        rv = cur.fetchall()
     return (rv[0] if rv else None) if one else rv
 
 
