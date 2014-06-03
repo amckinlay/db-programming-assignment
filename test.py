@@ -121,7 +121,7 @@ def add_students():
         g.db.commit()
     except sqlite3.IntegrityError as e:
         print e
-    return redirect(url_for('teachers'))
+    return redirect(url_for('students'))
 
 
 @app.route("/administrators")
